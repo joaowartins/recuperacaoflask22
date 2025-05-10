@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Novo Projeto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-xl mx-auto">
+        <h1 class="text-2xl font-bold mb-4">Criar Projeto</h1>
+        <form action="/criar" method="POST" enctype="multipart/form-data" class="bg-white p-4 rounded shadow">
+            <input type="text" name="nome" placeholder="Nome" class="w-full mb-2 p-2 border" required>
+            <textarea name="descricao" placeholder="Descrição" class="w-full mb-2 p-2 border" required></textarea>
+            <input type="file" name="imagem" class="mb-2">
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Salvar</button>
+        </form>
+    </div>
+</body>
+</html>

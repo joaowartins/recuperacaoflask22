@@ -1,0 +1,58 @@
+<!-- projeto.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ projeto.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow mt-10">
+        <h1 class="text-3xl font-bold mb-4">{{ projeto.nome }}</h1>
+        <p class="text-gray-700 mb-2"><strong>Descrição:</strong> {{ projeto.descricao }}</p>
+        <p class="text-gray-500 mb-6"><strong>Data de Criação:</strong> {{ projeto.data_criacao }}</p>
+
+        <!-- Mostrar imagem apenas se existir -->
+        {% if projeto.img and projeto.img != '' %}
+            <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" alt="Imagem do Projeto" class="h-48 w-full object-cover rounded mb-4">
+        {% endif %}
+
+        <h2 class="text-2xl font-semibold mb-2">Tarefas</h2>
+
+        <!-- Filtro de status -->
+        <form method="get" class="mb-4">
+            <label for="status" class="mr-2">Filtrar por status:</label>
+            <select name="status" id="status" class="border rounded p-1">
+                <option value="">Todos</option>
+                <option value="Pendente">Pendente</option>
+                <option value="Em andamento">Em andamento</option>
+                <option value="Concluída">Concluída</option>
+            </select>
+            <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded ml-2">Filtrar</button>
+        </form>
+
+        {% if tarefas %}
+            <ul class="space-y-4">
+                {% for tarefa in tarefas %}
+                    <li class="border p-4 rounded bg-gray-50">
+                        <h3 class="text-xl font-medium">{{ tarefa.titulo }}</h3>
+                        <p class="text-gray-700">{{ tarefa.descricao }}</p>
+                        <p class="text-sm text-gray-500">Status: {{ tarefa.status }}</p>
+                        <div class="mt-2">
+                            <a href="/editar_tarefa/{{ tarefa.id }}" class="text-blue-600 mr-4">Editar</a>
+                            <a href="/excluir_tarefa/{{ tarefa.id }}" class="text-red-600">Excluir</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-600">Nenhuma tarefa encontrada.</p>
+        {% endif %}
+
+        <div class="mt-6">
+            <a href="/adicionar_tarefa/{{ projeto.id }}" class="bg-green-500 text-white px-4 py-2 rounded">Adicionar Tarefa</a>
+            <a href="/" class="ml-4 text-gray-600">Voltar</a>
+        </div>
+    </div>
+</body>
+</html>
