@@ -1,27 +1,27 @@
-<!-- projeto.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <title>{{ projeto.nome }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Carrega o Tailwind CSS para estilização -->
 </head>
-<body class="bg-gray-400 p-6">
-    <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow mt-10">
-        <h1 class="text-3xl font-bold mb-4">{{ projeto.nome }}</h1>
-        <p class="text-gray-700 mb-2"><strong>Descrição:</strong> {{ projeto.descricao }}</p>
-        <p class="text-gray-500 mb-6"><strong>Data de Criação:</strong> {{ projeto.data_criacao }}</p>
+<body class="bg-gray-400 p-6"> <!-- Corpo da página com fundo cinza claro e espaçamento -->
+    <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow mt-10"> <!-- Div principal com bordas arredondadas, sombra e margem -->
+        <h1 class="text-3xl font-bold mb-4">{{ projeto.nome }}</h1> <!-- Título com o nome do projeto -->
+        <p class="text-gray-700 mb-2"><strong>Descrição:</strong> {{ projeto.descricao }}</p> <!-- Descrição do projeto -->
+        <p class="text-gray-500 mb-6"><strong>Data de Criação:</strong> {{ projeto.data_criacao }}</p> <!-- Data de criação do projeto -->
 
+        <!-- Verificação de imagem do projeto -->
         {% if projeto.img and projeto.img != '' %}
-            <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" alt="Imagem do Projeto" class="h-48 w-full object-cover rounded mb-4">
+            <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" alt="Imagem do Projeto" class="h-48 w-full object-cover rounded mb-4"> <!-- Exibe imagem se existir -->
         {% endif %}
 
-        <h2 class="text-2xl font-semibold mb-2">Tarefas</h2>
+        <h2 class="text-2xl font-semibold mb-2">TAREFAS </h2> <!-- Título das tarefas -->
 
-        <!-- Filtro de status -->
+        <!-- Formulário de filtro por status -->
         <form method="get" class="mb-4">
             <label for="status" class="mr-2">Filtrar por status:</label>
-            <select name="status" id="status" class="border rounded p-1">
+            <select name="status" id="status" class="border rounded p-1"> <!-- Dropdown para filtrar tarefas -->
                 <option value="">Todos</option>
                 <option value="Pendente">Pendente</option>
                 <option value="Em andamento">Em andamento</option>
@@ -30,39 +30,40 @@
             <button type="submit" class="bg-blue-500 text-white px-2 py-1 rounded ml-2">Filtrar</button>
         </form>
 
-        {% if tarefas %}
-            <ul class="space-y-4">
-                {% for tarefa in tarefas %}
-                    <li class="border p-4 rounded bg-gray-50">
-                        <h3 class="text-xl font-medium">{{ tarefa.titulo }}</h3>
-                        <p class="text-gray-700">{{ tarefa.descricao }}</p>
-                        <p class="text-sm text-gray-500">Status: {{ tarefa.status }}</p>
+        <!-- Exibição das tarefas -->
+        {% if tarefas %} <!-- Verifica se há tarefas -->
+            <ul class="space-y-4"> <!-- Lista de tarefas -->
+                {% for tarefa in tarefas %} <!-- Itera por cada tarefa -->
+                    <li class="border p-4 rounded bg-gray-50"> <!-- Estilo de cada tarefa -->
+                        <h3 class="text-xl font-medium">{{ tarefa.titulo }}</h3> <!-- Título da tarefa -->
+                        <p class="text-gray-700">{{ tarefa.descricao }}</p> <!-- Descrição da tarefa -->
+                        <p class="text-sm text-gray-500">Status: {{ tarefa.status }}</p> <!-- Status da tarefa -->
                         <div class="mt-2">
-                            <a href="/editar_tarefa/{{ tarefa.id }}" class="text-blue-600 mr-4">Editar</a>
-                            <a href="/excluir_tarefa/{{ tarefa.id }}" class="text-red-600">Excluir</a>
+                            <a href="/editar_tarefa/{{ tarefa.id }}" class="text-blue-600 mr-4">Editar</a> <!-- Link para editar -->
+                            <a href="/excluir_tarefa/{{ tarefa.id }}" class="text-red-600">Excluir</a> <!-- Link para excluir -->
                         </div>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p class="text-gray-600">Nenhuma tarefa encontrada.</p>
+            <p class="text-gray-600">Nenhuma tarefa encontrada.</p> <!-- Mensagem caso não haja tarefas -->
         {% endif %}
 
         <!-- Formulário para adicionar nova tarefa -->
         <form action="/adicionar_tarefa/{{ projeto.id }}" method="post" class="mt-10 bg-gray-50 p-4 rounded shadow">
             <h2 class="text-xl font-bold mb-2">Adicionar Nova Tarefa</h2>
-            <input type="text" name="titulo" placeholder="Título da Tarefa" class="w-full border p-2 mb-2 rounded" required>
-            <textarea name="descricao" placeholder="Descrição da Tarefa" class="w-full border p-2 mb-2 rounded" required></textarea>
-            <select name="status" class="w-full border p-2 mb-4 rounded">
+            <input type="text" name="titulo" placeholder="Título da Tarefa" class="w-full border p-2 mb-2 rounded" required> <!-- Campo para título -->
+            <textarea name="descricao" placeholder="Descrição da Tarefa" class="w-full border p-2 mb-2 rounded" required></textarea> <!-- Campo para descrição -->
+            <select name="status" class="w-full border p-2 mb-4 rounded"> <!-- Dropdown para status -->
                 <option value="Pendente">Pendente</option>
                 <option value="Em andamento">Em andamento</option>
                 <option value="Concluída">Concluída</option>
             </select>
-            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Adicionar Tarefa</button>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Adicionar Tarefa</button> <!-- Botão para adicionar tarefa -->
         </form>
 
         <div class="mt-6">
-            <a href="/" class="text-gray-600">Voltar</a>
+            <a href="/" class="text-gray-600">Voltar</a> <!-- Link para voltar à página anterior -->
         </div>
     </div>
 </body>

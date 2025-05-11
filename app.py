@@ -1,148 +1,205 @@
+#EXPLICAÇÃO DO COMO FOI CRIADO O PROJETO
+# PARTE 1 -
+# Importando ferramentas que vamos usar:
+# FLASK É UTILIZADO PARA A CRIAÇÃO DO SITE
+# RENDER_TEMPLATE PARA MOSTRAR AS PAGINAS HTML
+# REQUEST PARA PEGAR AS INFORMAÇÕES QUE O USUARIO DIGITA
+# REDIRECT PARA IR PARA OUTRA PAGINA
+# CSV PARA ARMAZENAR OS DADOS EM ARQUIVOS CSV
+# IMPORT OS PARA VERIFICAR SE O ARQUIVO EXISTE
 from flask import Flask, render_template, request, redirect, url_for
 import csv
 import os
 
+# PARTE 2 -
+# NO TRECHO EM BAIXO, CRIAMOS O APP FLASK
+# O FLASK É UM FRAMEWORK PARA CRIAÇÃO DE APLICAÇÕES WEB EM PYTHON
 app = Flask(__name__)
+
+# PARTE 3 - 
+# CRIAÇAO DA PASTA ONDE AS IMAGENS VÃO FICAR SALVAS
+# O APP.CONFIG SERVE PARA DEFINIR CONFIGURAÇÕES DO FLASK
+# UPLOAD_FOLDER E STATIC/IMG É O CAMINHO ONDE AS IMAGENS VÃO SER SALVAS
 app.config['UPLOAD_FOLDER'] = 'static/img'
 
+# PARTE 4 -
+# CRIAÇÃO DOS ARQUIVOS CSV QUE VÃO SER USADOS
+# PROJETOS_CSV É O ARQUIVO QUE VAI ARMAZENAR OS PROJETOS
+# TAREFAS_CSV É O ARQUIVO QUE VAI ARMAZENAR AS TAREFAS
 PROJETOS_CSV = 'projetos.csv'
 TAREFAS_CSV = 'tarefas.csv'
 
+# PARTE 5 -
+#O DEF LER_CSV É UMA FUNÇÃO QUE LÊ OS DADOS DO ARQUIVO CSV
 def ler_csv(caminho):
-    if not os.path.exists(caminho):
-        return []
-    with open(caminho, newline='', encoding='utf-8') as f:
-        return list(csv.DictReader(f))
+    if not os.path.exists(caminho):   #SE O ARQUIVO NÃO EXISTIR, RETORNA UMA LISTA VAZIA.
+        return [] 
+    
+    # SE O ARQUIVO EXISTIR, LÊ OS DADOS DO CSV
+    with open(caminho, newline='', encoding='utf-8') as f: # WITH OPEN ABRE O ARQUIVO, NEWLINE='' É PARA NÃO DAR QUEBRA DE LINHA, E ENCODING='UTF-8' É PARA LER CARACTERES ESPECIAIS.
+        return list(csv.DictReader(f))  # RETORNA OS DADOS COMO UMA LISTA DE DICIONÁRIOS.
+        # A FUNÇÃO CSV.DICTREADER LÊ O ARQUIVO CSV E TRANSFORMA EM UMA LISTA DE DICIONÁRIOS, ONDE CADA DICIONÁRIO REPRESENTA UMA LINHA DO CSV.
 
+
+# PARTE 6 -
+# A FUNÇÃO ESCREVER_CSV É RESPONSÁVEL POR ESCREVER OS DADOS NO ARQUIVO CSV
+# CAMINHO É O NOME DO ARQUIVO CSV, DADOS É A LISTA DE DICIONÁRIOS QUE VAI SER ESCRITA NO CSV, E CAMPOS SÃO OS NOMES DAS COLUNAS.
 def escrever_csv(caminho, dados, campos):
-    with open(caminho, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=campos)
-        writer.writeheader()
-        writer.writerows(dados)
+    with open(caminho, 'w', newline='', encoding='utf-8') as f: # ABRE O ARQUIVO CSV PARA ESCRITA ONDE 'W' SIGNIFICA QUE VAI ESCREVER NO ARQUIVO, E NEWLINE='' É PARA NÃO DAR QUEBRA DE LINHA.
+        writer = csv.DictWriter(f, fieldnames=campos)  #  AQUI EU CRIEI UM OBJETO WRITER QUE VAI ESCREVER NO ARQUIVO CSV, CSV.DICTWRITER É UMA CLASSE QUE ESCREVE DADOS EM FORMATO DE DICIONÁRIO.
+        # O FIELDNAMES É IMPORTANTE POIS ELE DEFINE QUAIS COLUNAS VÃO APARCER NO CSV.
+        writer.writeheader()  # ESCREVE O CABEÇALHO DO CSV, OU SEJA, OS NOMES DAS COLUNAS, POR EXEMPLO: ID, NOME, DESCRIÇÃO, IMG.
+        writer.writerows(dados)  # ESCREVE AS LINHAS DO CSV, OU SEJA, OS DADOS QUE ESTÃO NA LISTA DE DICIONÁRIOS, POR EXEMPLO: O NOME DO PROJETO, A DESCRIÇÃO, E A IMAGEM.
 
+
+# PARTE 7 -
+# AQUI EU CRIEI AS ROTAS DO FLASK, QUE SÃO AS PÁGINAS DO SITE
+# A ROTA '/' É A PÁGINA INICIAL DO SITE, QUE MOSTRA TODOS OS PROJETOS
 @app.route('/')
-def index():
-    projetos = ler_csv(PROJETOS_CSV)
-    return render_template('index.html', projetos=projetos)
+def index(): # FUNCÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/'
+    projetos = ler_csv(PROJETOS_CSV)  # IMPORTANTE, POIS AQUI EU CHAMEI A FUNÇÃO LER_CSV PARA LER OS DADOS DO ARQUIVO CSV DOS PROJETOS.
+    #OU SEJA, SE EU CRIEI UM PROJETO, ELE VAI APARECER NESSA PÁGINA.
+    return render_template('index.html', projetos=projetos)  # VAI RENDERIZAR O HTML DA PÁGINA INICIAL, PASSANDO A LISTA DE PROJETOS LIDA DO CSV PARA O HTML.
+    # RENDER_TEMPLATE É UMA FUNÇÃO DO FLASK QUE RENDERIZA UM TEMPLATE HTML, OU SEJA, CRIA A PÁGINA QUE O USUÁRIO VAI VER NO NAVEGADOR.
 
-@app.route('/criar', methods=['GET', 'POST'])
-def criar():
-    if request.method == 'POST':
-        projetos = ler_csv(PROJETOS_CSV)
-        novo_id = str(len(projetos) + 1)
-        nome = request.form['nome']
-        descricao = request.form['descricao']
-        imagem = request.files['imagem']
-        nome_img = ''
+# PARTE 8 -
+# AQUI EU CRIEI A ROTA '/criar', QUE É A PÁGINA PARA CRIAR UM NOVO PROJETO
+@app.route('/criar', methods=['GET', 'POST']) # AQUI EU DEFINI QUE A ROTA ACEITA OS MÉTODOS GET E POST, OU SEJA, QUANDO O USUÁRIO ACESSAR A PÁGINA, VAI SER UM GET, MAS QUANDO O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+def criar(): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/criar'
+    if request.method == 'POST':  # SE O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+        projetos = ler_csv(PROJETOS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DOS PROJETOS.
+        novo_id = str(len(projetos) + 1)  # AQUI EU CRIEI UM NOVO ID PARA O PROJETO, QUE É O TAMANHO DA LISTA DE PROJETOS + 1, OU SEJA, SE TEM 3 PROJETOS, O NOVO ID VAI SER 4.
+        nome = request.form['nome'] # AQUI EU PEGUEI O NOME DO PROJETO QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+        descricao = request.form['descricao'] # AQUI EU PEGUEI A DESCRIÇÃO DO PROJETO QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+        imagem = request.files['imagem'] #  E ENTAO EU PEGUEI A IMAGEM DO PROJETO QUE O USUÁRIO ESCOLHEU NO FORMULÁRIO.
+        nome_img = '' # AQUI EU CRIEI UMA VARIÁVEL VAZIA PARA O NOME DA IMAGEM.
 
+        
+        # AQUI EU VERIFICO SE O USUÁRIO ESCOLHEU UMA IMAGEM, SE SIM, EU SALVO A IMAGEM NA PASTA QUE EU CRIEI NO INÍCIO DO CÓDIGO.
         if imagem and imagem.filename != '':
-            nome_img = f"{novo_id}_{imagem.filename}"
-            imagem.save(os.path.join(app.config['UPLOAD_FOLDER'], nome_img))
+            nome_img = f"{novo_id}_{imagem.filename}" # AQUI EU CRIEI O NOME DA IMAGEM, QUE É O ID DO PROJETO + O NOME DA IMAGEM QUE O USUÁRIO ESCOLHEU.
+            imagem.save(os.path.join(app.config['UPLOAD_FOLDER'], nome_img)) # AQUI EU SALVEI A IMAGEM NA PASTA QUE EU CRIEI NO INÍCIO DO CÓDIGO, USANDO O NOME QUE EU CRIEI ANTES.
 
-        projetos.append({
-            'id': novo_id,
-            'nome': nome,
-            'descricao': descricao,
-            'img': nome_img
+        # ADICIONA O NOVO PROJETO À LISTA DE PROJETOS
+        projetos.append({ 
+            'id': novo_id, # AQUI EU ADICIONEI O NOVO PROJETO À LISTA DE PROJETOS, CRIANDO UM DICIONÁRIO COM AS INFORMAÇÕES DO PROJETO.
+            'nome': nome,  # AQUI EU ADICIONEI O NOME DO PROJETO.
+            'descricao': descricao,  # AQUI EU ADICIONEI A DESCRIÇÃO DO PROJETO.
+            'img': nome_img  # AQUI EU ADICIONEI O NOME DA IMAGEM DO PROJETO.
         })
 
+        # SALVA TUDO NO CSV
         escrever_csv(PROJETOS_CSV, projetos, ['id', 'nome', 'descricao', 'img'])
-        return redirect('/')
-    return render_template('criar_projeto.html')
+        return redirect('/')  # VOLTA PARA A PÁGINA INICIAL DO SITE, QUE É A ROTA '/'.
+    return render_template('criar_projeto.html')  # RENDERIZA O HTML DA PÁGINA DE CRIAÇÃO DO PROJETO, QUE É A ROTA '/criar'.
 
-@app.route('/editar/<id>', methods=['GET', 'POST'])
-def editar(id):
-    projetos = ler_csv(PROJETOS_CSV)
-    for projeto in projetos:
-        if projeto['id'] == id:
-            if request.method == 'POST':
-                projeto['nome'] = request.form['nome']
-                projeto['descricao'] = request.form['descricao']
-                escrever_csv(PROJETOS_CSV, projetos, ['id', 'nome', 'descricao', 'img'])
-                return redirect('/')
-            return render_template('editar_projeto.html', projeto=projeto)
-    return 'Projeto não encontrado'
+# PARTE 9 -
+@app.route('/editar/<id>', methods=['GET', 'POST']) # ROTA PARA EDITAR UM PROJETO
+# AQUI EU FIZ IGUAL ANTERIORMENTE QUE A ROTA ACEITA OS MÉTODOS GET E POST, OU SEJA, QUANDO O USUÁRIO ACESSAR A PÁGINA, VAI SER UM GET, MAS QUANDO O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+def editar(id): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/editar/<id>', ONDE <ID> É O ID DO PROJETO QUE O USUÁRIO QUER EDITAR.
+    projetos = ler_csv(PROJETOS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DOS PROJETOS.
+    for projeto in projetos: # AQUI EU FAÇO UM LOOP PARA ENCONTRAR O PROJETO COM O ID QUE O USUÁRIO QUER EDITAR.
+        if projeto['id'] == id:  # SE O ID DO PROJETO FOR IGUAL AO ID QUE O USUÁRIO QUER EDITAR, EU ENCONTREI O PROJETO.
+            if request.method == 'POST':  # SE O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+                projeto['nome'] = request.form['nome'] # AQUI EU PEGUEI O NOME DO PROJETO QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+                projeto['descricao'] = request.form['descricao'] # AQUI EU PEGUEI A DESCRIÇÃO DO PROJETO QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+                escrever_csv(PROJETOS_CSV, projetos, ['id', 'nome', 'descricao', 'img']) # AQUI EU SALVEI AS INFORMAÇÕES DO PROJETO NO CSV.
+                return redirect('/') # VOLTA PARA A PÁGINA INICIAL DO SITE, QUE É A ROTA '/'.
+            return render_template('editar_projeto.html', projeto=projeto)  # RENDERIZA O HTML DA PÁGINA DE EDIÇÃO DO PROJETO, PASSANDO O PROJETO QUE O USUÁRIO QUER EDITAR.
+    return 'Projeto não encontrado'  # SE O PROJETO NÃO FOR ENCONTRADO, RETORNA UMA MENSAGEM DE ERRO.
 
-@app.route('/excluir/<id>')
-def excluir(id):
-    projetos = ler_csv(PROJETOS_CSV)
-    tarefas = ler_csv(TAREFAS_CSV)
-    projetos = [p for p in projetos if p['id'] != id]
-    tarefas = [t for t in tarefas if t['id_projeto'] != id]
-    escrever_csv(PROJETOS_CSV, projetos, ['id', 'nome', 'descricao', 'img'])
-    escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status'])
-    return redirect('/')
+# PARTE 10 -
+@app.route('/excluir/<id>') # ROTA PARA EXCLUIR UM PROJETO
+def excluir(id): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/excluir/<id>', ONDE <ID> É O ID DO PROJETO QUE O USUÁRIO QUER EXCLUIR.
+    projetos = ler_csv(PROJETOS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DOS PROJETOS.
+    tarefas = ler_csv(TAREFAS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DAS TAREFAS.
 
-@app.route('/projeto/<id>', methods=['GET', 'POST'])
+    projetos = [p for p in projetos if p['id'] != id] # AQUI EU FILTRO OS PROJETOS, MANTENDO APENAS OS QUE NÃO SÃO O QUE O USUÁRIO QUER EXCLUIR.
+    tarefas = [t for t in tarefas if t['id_projeto'] != id] # AQUI EU FILTRO AS TAREFAS, MANTENDO APENAS AS QUE NÃO SÃO DO PROJETO QUE O USUÁRIO QUER EXCLUIR.
+    escrever_csv(PROJETOS_CSV, projetos, ['id', 'nome', 'descricao', 'img']) # AQUI EU SALVEI AS INFORMAÇÕES DOS PROJETOS NO CSV.
+    escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status']) # AQUI EU SALVEI AS INFORMAÇÕES DAS TAREFAS NO CSV.
+    return redirect('/') # VOLTA PARA A PÁGINA INICIAL DO SITE, QUE É A ROTA '/'.
+
+# PARTE 11 -
+
+@app.route('/projeto/<id>', methods=['GET', 'POST']) # ROTA PARA VER UM PROJETO ESPECÍFICO
+# AQUI DENOVO EU DEFINO QUE A ROTA ACEITA OS MÉTODOS GET E POST, OU SEJA, QUANDO O USUÁRIO ACESSAR A PÁGINA, VAI SER UM GET, MAS QUANDO O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST. 
 def projeto(id):
-    projetos = ler_csv(PROJETOS_CSV)
-    tarefas = ler_csv(TAREFAS_CSV)
+    projetos = ler_csv(PROJETOS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DOS PROJETOS.
+    tarefas = ler_csv(TAREFAS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DAS TAREFAS.
 
-    for p in projetos:
-        if p['id'] == id:
-            projeto = p
-            break
+    
+    for p in projetos: # AQUI EU FAÇO UM LOOP PARA ENCONTRAR O PROJETO COM O ID QUE O USUÁRIO QUER VER.
+        if p['id'] == id: # SE O ID DO PROJETO FOR IGUAL AO ID QUE O USUÁRIO QUER VER, O PROJETO é ENCONTRADO.
+            projeto = p # AQUI EU GUARDO O PROJETO ENCONTRADO NA VARIÁVEL PROJETO.
+            break # PARA O LOOP, JÁ QUE ENCONTREI O PROJETO.
     else:
-        return 'Projeto não encontrado'
+        return 'Projeto não encontrado' # SE O PROJETO NÃO FOR ENCONTRADO, RETORNA UMA MENSAGEM DE ERRO.
 
-    tarefas_projeto = [t for t in tarefas if t['id_projeto'] == id]
+    tarefas_projeto = [t for t in tarefas if t['id_projeto'] == id] # AQUI EU FILTRO AS TAREFAS, MANTENDO APENAS AS QUE SÃO DO PROJETO QUE O USUÁRIO QUER VER.
 
-    total = len(tarefas_projeto)
-    concluidas = 0
-    for t in tarefas_projeto:
-        if t['status'] == 'Concluída':
-            concluidas += 1
-    progresso = int((concluidas / total) * 100) if total > 0 else 0
+    
+    total = len(tarefas_projeto) # AQUI EU CONTABILIZO O TOTAL DE TAREFAS DO PROJETO.
+    concluidas = 0 # AQUI EU CRIEI UMA VARIÁVEL VAZIA PARA CONTABILIZAR O TOTAL DE TAREFAS CONCLUÍDAS.
+    for t in tarefas_projeto: # AQUI EU FAÇO UM LOOP PARA CONTABILIZAR O TOTAL DE TAREFAS CONCLUÍDAS.
+        if t['status'] == 'Concluída': # SE O STATUS DA TAREFA FOR IGUAL A 'CONCLUÍDA', A TAREFA É CONCLUÍDA.
+            concluidas += 1 # AQUI EU SOMO 1 À VARIÁVEL CONCLUÍDAS, CONTABILIZANDO O TOTAL DE TAREFAS CONCLUÍDAS.
+    return render_template('projeto.html', projeto=projeto, tarefas=tarefas_projeto) # RENDERIZA O HTML DA PÁGINA DO PROJETO, PASSANDO O PROJETO QUE O USUÁRIO QUER VER E AS TAREFAS DO PROJETO.
 
-    return render_template('projeto.html', projeto=projeto, tarefas=tarefas_projeto, progresso=progresso)
+# PARTE 12 -
+@app.route('/adicionar_tarefa/<id_projeto>', methods=['POST']) # ROTA PARA ADICIONAR UMA TAREFA A UM PROJETO
+def adicionar_tarefa(id_projeto): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO CLICAR NO BOTÃO SALVAR NA PÁGINA DE ADICIONAR TAREFA.
+    tarefas = ler_csv(TAREFAS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DAS TAREFAS.
+    novo_id = str(len(tarefas) + 1) # AQUI EU CRIEI UM NOVO ID PARA A TAREFA, QUE É O TAMANHO DA LISTA DE TAREFAS + 1, OU SEJA, SE TEM 3 TAREFAS, O NOVO ID VAI SER 4.
+    titulo = request.form['titulo'] # AQUI EU PEGUEI O TÍTULO DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+    descricao = request.form['descricao'] # AQUI EU PEGUEI A DESCRIÇÃO DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+    status = request.form['status'] # AQUI EU PEGUEI O STATUS DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
 
-@app.route('/adicionar_tarefa/<id_projeto>', methods=['POST'])
-def adicionar_tarefa(id_projeto):
-    tarefas = ler_csv(TAREFAS_CSV)
-    novo_id = str(len(tarefas) + 1)
-    titulo = request.form['titulo']
-    descricao = request.form['descricao']
-    status = request.form['status']
-
-    tarefas.append({
-        'id': novo_id,
-        'id_projeto': id_projeto,
-        'titulo': titulo,
-        'descricao': descricao,
-        'status': status
+    tarefas.append({ # AQUI EU ADICIONEI A NOVA TAREFA À LISTA DE TAREFAS, CRIANDO UM DICIONÁRIO COM AS INFORMAÇÕES DA TAREFA.
+        'id': novo_id, # NOVO ID DA TAREFA.
+        'id_projeto': id_projeto, # ID DO PROJETO AO QUAL A TAREFA PERTENCE.
+        'titulo': titulo, # TÍTULO DA TAREFA.
+        'descricao': descricao, # DESCRIÇÃO DA TAREFA.
+        'status': status # STATUS DA TAREFA.
     })
 
-    escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status'])
-    return redirect(f'/projeto/{id_projeto}')
+    escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status']) # AQUI EU SALVEI AS INFORMAÇÕES DAS TAREFAS NO CSV.
+    return redirect(f'/projeto/{id_projeto}') # VOLTA PARA A PÁGINA DO PROJETO, QUE É A ROTA '/projeto/<id_projeto>'.
 
-@app.route('/editar_tarefa/<id>', methods=['GET', 'POST'])
-def editar_tarefa(id):
-    tarefas = ler_csv(TAREFAS_CSV)
-    for tarefa in tarefas:
-        if tarefa['id'] == id:
-            if request.method == 'POST':
-                tarefa['titulo'] = request.form['titulo']
-                tarefa['descricao'] = request.form['descricao']
-                tarefa['status'] = request.form['status']
-                escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status'])
-                return redirect(f"/projeto/{tarefa['id_projeto']}")
-            return render_template('editar_tarefa.html', tarefa=tarefa)
-    return 'Tarefa não encontrada'
+# PARTE 13 (FINAL) -
 
-@app.route('/excluir_tarefa/<id>')
-def excluir_tarefa(id):
-    tarefas = ler_csv(TAREFAS_CSV)
-    nova_lista = []
-    id_projeto = ''
 
-    for tarefa in tarefas:
-        if tarefa['id'] == id:
-            id_projeto = tarefa['id_projeto']
+@app.route('/editar_tarefa/<id>', methods=['GET', 'POST']) # ROTA PARA EDITAR UMA TAREFA
+# AQUI EU DEFINO QUE A ROTA ACEITA OS MÉTODOS GET E POST, OU SEJA, QUANDO O USUÁRIO ACESSAR A PÁGINA, VAI SER UM GET, MAS QUANDO O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+def editar_tarefa(id): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/editar_tarefa/<id>', ONDE <ID> É O ID DA TAREFA QUE O USUÁRIO QUER EDITAR.
+    tarefas = ler_csv(TAREFAS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DAS TAREFAS.
+    for tarefa in tarefas: # AQUI EU FAÇO UM LOOP PARA ENCONTRAR A TAREFA COM O ID QUE O USUÁRIO QUER EDITAR.
+        if tarefa['id'] == id: # SE O ID DA TAREFA FOR IGUAL AO ID QUE O USUÁRIO QUER EDITAR, A TAREFA É ENCONTRADA.
+            if request.method == 'POST': # SE O USUÁRIO CLICAR NO BOTÃO SALVAR, VAI SER UM POST.
+                tarefa['titulo'] = request.form['titulo'] # AQUI EU PEGUEI O TÍTULO DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+                tarefa['descricao'] = request.form['descricao'] # AQUI EU PEGUEI A DESCRIÇÃO DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+                tarefa['status'] = request.form['status'] # AQUI EU PEGUEI O STATUS DA TAREFA QUE O USUÁRIO DIGITOU NO FORMULÁRIO.
+                escrever_csv(TAREFAS_CSV, tarefas, ['id', 'id_projeto', 'titulo', 'descricao', 'status']) # AQUI EU SALVEI AS INFORMAÇÕES DAS TAREFAS NO CSV.
+                return redirect(f"/projeto/{tarefa['id_projeto']}") # VOLTA PARA A PÁGINA DO PROJETO, QUE É A ROTA '/projeto/<id_projeto>'.
+            return render_template('editar_tarefa.html', tarefa=tarefa) # RENDERIZA O HTML DA PÁGINA DE EDIÇÃO DA TAREFA, PASSANDO A TAREFA QUE O USUÁRIO QUER EDITAR.
+    return 'Tarefa não encontrada' # SE A TAREFA NÃO FOR ENCONTRADA, RETORNA UMA MENSAGEM DE ERRO.
+
+
+@app.route('/excluir_tarefa/<id>') # ROTA PARA EXCLUIR UMA TAREFA
+def excluir_tarefa(id): # FUNÇÃO QUE SERÁ EXECUTADA QUANDO O USUÁRIO ACESSAR A ROTA '/excluir_tarefa/<id>', ONDE <ID> É O ID DA TAREFA QUE O USUÁRIO QUER EXCLUIR.
+    tarefas = ler_csv(TAREFAS_CSV) # LÊ OS DADOS DO ARQUIVO CSV DAS TAREFAS.
+    nova_lista = [] # AQUI EU CRIEI UMA LISTA VAZIA PARA ARMAZENAR AS TAREFAS QUE NÃO SÃO A QUE O USUÁRIO QUER EXCLUIR.
+    id_projeto = '' # AQUI EU CRIEI UMA VARIÁVEL VAZIA PARA O ID DO PROJETO, QUE VAI SER USADO PARA REDIRECIONAR O USUÁRIO DEPOIS.
+
+    for tarefa in tarefas: # AQUI EU FAÇO UM LOOP PARA ENCONTRAR A TAREFA COM O ID QUE O USUÁRIO QUER EXCLUIR.
+        if tarefa['id'] == id: # SE O ID DA TAREFA FOR IGUAL AO ID QUE O USUÁRIO QUER EXCLUIR, A TAREFA É ENCONTRADA.
+            id_projeto = tarefa['id_projeto']  # AQUI EU GUARDO O ID DO PROJETO DA TAREFA QUE O USUÁRIO QUER EXCLUIR.
         else:
-            nova_lista.append(tarefa)
+            nova_lista.append(tarefa) # AQUI EU ADICIONO AS TAREFAS QUE NÃO SÃO A QUE O USUÁRIO QUER EXCLUIR NA LISTA NOVA.
 
-    escrever_csv(TAREFAS_CSV, nova_lista, ['id', 'id_projeto', 'titulo', 'descricao', 'status'])
-    return redirect(f"/projeto/{id_projeto}")
+    escrever_csv(TAREFAS_CSV, nova_lista, ['id', 'id_projeto', 'titulo', 'descricao', 'status']) # AQUI EU SALVEI AS INFORMAÇÕES DAS TAREFAS NO CSV, COM A LISTA NOVA QUE NÃO TEM MAIS A TAREFA QUE O USUÁRIO QUER EXCLUIR.
+    return redirect(f"/projeto/{id_projeto}") # VOLTA PARA A PÁGINA DO PROJETO, QUE É A ROTA '/projeto/<id_projeto>'.
 
-if __name__ == '__main__':
-    app.run(debug=True)
+
+if __name__ == '__main__': # AQUI EU DEFINI QUE O CÓDIGO VAI SER EXECUTADO SE O ARQUIVO FOR EXECUTADO DIRETAMENTE, OU SEJA, SE O USUÁRIO EXECUTAR O ARQUIVO 'APP.PY'.
+    app.run(debug=True)  # AQUI EU DEFINI QUE O FLASK VAI RODAR NO MODO DEBUG, OU SEJA, SE O USUÁRIO FIZER ALGUMA MUDANÇA NO CÓDIGO, O FLASK VAI ATUALIZAR AUTOMATICAMENTE.
