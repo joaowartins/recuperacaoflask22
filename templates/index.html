@@ -2,28 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Projetos</title>
+    <title>Meus Projetos</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold mb-4">Projetos</h1>
-        <a href="/criar" class="bg-blue-500 text-white px-4 py-2 rounded">+ Novo Projeto</a>
+<body class="bg-gray-200 p-4">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-medium mb-4">Meus Projetos</h1>
+        <a href="/criar" class="bg-blue-500 text-white py-2 px-4 rounded">+ Criar Novo Projeto</a>
 
-        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="mt-6">
             {% for projeto in projetos %}
-                <div class="bg-white p-4 rounded shadow">
+                <div class="border p-4 mb-4 rounded">
                     {% if projeto.img %}
-                        <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" class="h-40 w-full object-cover rounded mb-2">
+                        <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" class="mb-2 rounded" style="max-height: 150px; object-fit: cover;">
                     {% endif %}
-                    <h2 class="text-xl font-bold">{{ projeto.nome }}</h2>
-                    <p>{{ projeto.descricao }}</p>
-                    <p class="text-sm text-gray-600">Criado em: {{ projeto.data }}</p>
-                    <div class="mt-2">
-                        <a href="/projeto/{{ projeto.id }}" class="text-blue-500">Ver Tarefas</a> |
-                        <a href="/editar/{{ projeto.id }}" class="text-yellow-500">Editar</a> |
-                        <a href="/excluir/{{ projeto.id }}" class="text-red-500">Excluir</a>
-                    </div>
+                    <h2 class="font-semibold text-xl">{{ projeto.nome }}</h2>
+                    <p class="text-gray-600 mb-2">{{ projeto.descricao }}</p>
+                    <a href="/projeto/{{ projeto.id }}" class="text-blue-600 hover:text-blue-800">Ver Tarefas</a> | 
+                    <a href="/editar/{{ projeto.id }}" class="text-yellow-600 hover:text-yellow-800">Editar</a> | 
+                    <a href="/excluir/{{ projeto.id }}" class="text-red-600 hover:text-red-800">Excluir</a>
                 </div>
             {% endfor %}
         </div>
