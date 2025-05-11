@@ -2,24 +2,27 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Meus Projetos</title>
+    <title>PROJETOS</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-200 p-4">
+<body class="bg-gray-400 p-4">
     <div class="max-w-2xl mx-auto">
-        <h1 class="text-2xl font-medium mb-4">Meus Projetos</h1>
-        <a href="/criar" class="bg-blue-500 text-white py-2 px-4 rounded">+ Criar Novo Projeto</a>
+        <h1 class="text-5xl font-medium mb-4">Gerenciador de Projetos SENAI</h1>
+        <a href="/criar" class="bg-blue-300 text-white py-2 px-4 rounded">CRIAR NOVO PROJETO</a>
 
         <div class="mt-6">
             {% for projeto in projetos %}
+
+                 <!-- Cartão com borda, padding interno, margem inferior e cantos arredondados -->
                 <div class="border p-4 mb-4 rounded">
+
                     {% if projeto.img %}
                         <img src="{{ url_for('static', filename='img/' ~ projeto.img) }}" class="mb-2 rounded" style="max-height: 150px; object-fit: cover;">
                     {% endif %}
                     <h2 class="font-semibold text-xl">{{ projeto.nome }}</h2>
                     <p class="text-gray-600 mb-2">{{ projeto.descricao }}</p>
-                    <a href="/projeto/{{ projeto.id }}" class="text-blue-600 hover:text-blue-800">Ver Tarefas</a> | 
-                    <a href="/editar/{{ projeto.id }}" class="text-yellow-600 hover:text-yellow-800">Editar</a> | 
+                    <a href="/projeto/{{ projeto.id }}" class="text-white hover:text-white">Ver Tarefas</a> | 
+                    <a href="/editar/{{ projeto.id }}" class="text-green-600 hover:text-green-800">Editar</a>| 
                     <a href="/excluir/{{ projeto.id }}" class="text-red-600 hover:text-red-800">Excluir</a>
                 </div>
             {% endfor %}
