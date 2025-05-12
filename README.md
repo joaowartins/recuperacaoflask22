@@ -28,7 +28,7 @@ O código foi construído no app.py e cada linha do código foi comentada.
 
 # COMO EXECUTAR
 
-primeiro passo - clone meu repositorio git
+primeiro passo - clone meu repositorio git: 
 git clone https://github.com/joaowartins/recuperacaoflask22.git
 
 segundo passo - ativar o ambiente virtual
